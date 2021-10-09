@@ -1,0 +1,381 @@
+---
+title: "Data Science Fundamentals: Modeling"
+author: "Rachel Greenlee"
+date: "10/8/2021"
+output:
+  html_document:
+    code_folding: hide
+    df_print: paged
+    toc: yes
+    toc_float: yes
+    toc_collapsed: yes
+    toc_depth: 2
+    theme: sandstone
+    fig_width: 6
+    fig_height: 4
+  pdf_document:
+    toc: yes
+    toc_depth: '1'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(faraway) # datasets from author of Linear Models w/ R book
+# to make dataset from faraway library workable
+statedata <- data.frame(state.x77,row.names=state.abb)
+
+library(leaps) # performs exhaustive search for best regression subset selection
+library(pls) # for pcr function in PCA section
+library(Metrics) # for rmse function PCA section
+
+
+
+```
+
+
+# 1. Consider data type and goals
+
+Focus on the main objective of the modelling. A larger model might provide better predictions, and we might not want to compromise accurate predictions in favor of a smaller model. If it's more important that the model is easy to interpret and explain you might lean toward a smaller model, and be cautious using automated variable selection procedures.
+
+
+
+# 2. Model Options
+
+## Types {.tabset}
+
+### Linear Regression
+
+Used when response variable is quantitative. 
+
+Despite its simplicity, the linear model has advantages in interpretability and it often shows good predictive performance.
+
+### Classification
+
+
+See group HW2 from 621 class.
+
+
+
+# 3. Feature Selection
+
+I've seen a few different ways of defining what is/isn't feature selection, feature extraction, and dimensionality reduction. See below concepts. I've concluded that all feature selection is dimensionality reduction, but that the wrapper/filter/embedded subset of tools are simply selecting/excluding given features without changing or re-combining them into new features which happens with feature extration.
+
+![](images/dimensionality_reduction2.PNG)
+![](images/feature_engineering.PNG)
+![](images/fwe.PNG)
+
+
+## Filter Methods {.tabset}
+
+### Missing Value Ratio
+
+### Low Variance
+
+### Correlation coefficient score
+
+### Information Gain
+
+### ANOVA
+
+### Chi Square Test
+
+## Wrapper Methods {.tabset}
+
+### Forward Feature Selection
+
+### Backward Elimination
+
+Faraway (Linear Models with R) does not recommend the test-based procedures of backward elimination, forward selection, or stepwise regression - except in simple cases when only a few models are compared or in highly structured hierarchical models. 
+
+### Example 
+
+Regardless, all the textbooks seem to cover these. Here is an example of backwards elimination from the prompt on page 159 Faraway (Linear Models with R) but instead using the 'state' dataset from p151 as I can interpret it better.
+
+Starting with lmod_1 below, we will remove the predictor with the largest p-value until we are within the threshold we want, very often that .05 and I'll use that here. Omitted variables still may be related to the response variable, they just might be redundant/already captured in other variables. That is why this method suffers from not being able to distinguish between important and unimportant predictors.
+
+```{r}
+
+
+lmod <- lm(Life.Exp ~ ., data = statedata)
+summary(lmod)
+```
+
+Since Area is the largest p-value above, we remove it and remodel.
+
+```{r}
+lmod <- update(lmod, . ~ . - Area)
+summary(lmod)
+```
+
+Next we remove Illiteracy.
+
+```{r}
+lmod <- update(lmod, . ~ . - Illiteracy)
+summary(lmod)
+```
+
+Next is Income.
+
+```{r}
+lmod <- update(lmod, . ~ . - Income)
+summary(lmod)
+```
+
+Population is close to our 0.05 cut-off, we choose to remove it (imagine we want the simplest model).
+
+```{r}
+lmod <- update(lmod, . ~ . - Population)
+summary(lmod)
+```
+
+Via the backwards elimination feature selection method for this dataset the above model would be the final one, with murder, high school graduation, and frost as the predictors in the model. We can say that 69.4% of the variability in the data can be predicted by this model (see Adjusted R-squared value). 
+
+### Stepwise Selection
+
+## Embedded Methods {.tabset}
+
+### LASSO Regression
+
+### Ridge Rerression
+
+### Random Forest
+
+
+## Feature Extration/Shrinkage {.tabset}
+
+In the linear regression context, subsetting means choosing a subset from available variables to include in the model, thus reducing its dimensionality. Shrinkage, on the other hand, means reducing the size of the coefficient estimates (shrinking them towards zero). Note that if a coefficient gets shrunk to exactly zero, the corresponding variable drops out of the model. Consequently, such a case can also be seen as a kind of subsetting.
+
+Shrinkage and selection aim at improving upon the simple linear regression. There are two main reasons why it could need improvement:
+
+Prediction accuracy: Linear regression estimates tend to have low bias and high variance. Reducing model complexity (the number of parameters that need to be estimated) results in reducing the variance at the cost of introducing more bias. If we could find the sweet spot where the total error, so the error resulting from bias plus the one from variance, is minimized, we can improve the model’s predictions.
+
+Model’s interpretability: With too many predictors it is hard for a human to grasp all the relations between the variables. In some cases we would be willing to determine a small subset of variables with the strongest impact, thus sacrificing some details in order to get the big picture.  
+
+See model complexity and bias-variance section. As an example, linear regression tends to suffer from high variance, but benefits from a low bias especially when there are many predictors or if they are highly correlated with each other. **This is where subsetting and regularization come to rescue. They allow reducing the variance at the cost of introducing some bias, ultimately reducing the total error of the model.**
+
+https://towardsdatascience.com/a-comparison-of-shrinkage-and-selection-methods-for-linear-regression-ee4dd3a71f16
+
+PCR and PLS are particularly attractive methods when there are large numbers of predictors *p* relative to the sample size *n*. They can still work even when *p > n*.  PLS tends to have an advantage over PCR for prediction problems because PLS constructs its linear combination explicitly to predict the response. On the other hand, PCR is better suited for developing insights by forming linear combinations that have interesting interpretations.  However, they tend to not really reduce the number of predictors used (they just combine them), so if that's a goal the criterion-based variable selection () or lasso method may be more useful.
+
+
+### PLS
+
+Partial Least Squares (PLS).
+
+Similarly to Principal Components Regression, it also uses a small set of linear combinations of the original features. The difference lies in how these combinations are constructed. While Principal Components Regression uses only X themselves to create the derived features Z, Partial Least Squares additionally uses the target y. Hence, while constructing Z, PLS seeks directions that have high variance (as these can explain variance in the target) and high correlation with the target. This stays in contrast to the principal components approach, which focuses on high variance only.  
+
+Various algorithms are available to compute PLS. We will use crossvalidation (CV) as is done in PCR (see that section).  
+
+Similar to PCR, PLS is sensitive to assumptions as OLS, so it is still mandatory to do a full analysis with diagnostics. 
+
+#### Simple Example
+
+From the short example in the Faraway textbook starting on page 173.  
+
+
+
+### PCR
+
+Principal Component Regression (PCR) squeezes the input space of the original features into a lower-dimensional space. Mainly, they use X to create a small set of new features Z that are linear combinations of X and then use those in regression models. When the goal fo eh regression is to find simple, well-fitting and understandable models for the response, PCR *may* help - as PCs are linear combinations of the predictors. 
+
+While similar to Ridge Regression, the difference is that PCR discards the components with the least informative power, while Ridge Regression simply shrinks them stronger.  
+
+Some may argue that using PCA to select features (or linear combinations of features rather) isn't really reduce the number of features needed to predict the response variable. Also, we have to subjectively interpret the meaning of the PCs. One option is to take a few of the largest predictors from the PCs and run a new model from those insights that would be simpler without much loss of model prediction. See page 166 Faraway for an example of this.
+
+PCA can be very sensitive to outliers, so ensure to check for these. Further, while a value might not look like a outlier on it's own, once PCA combines it with another predictor it could become one. For example, if someone 4' 11" weighed 250 pounds would be more of an outlier when combined than looked at separately. See page 164 Faraway for two thorough examples of this, including one that start with 100 predictors.  
+
+You may want to do crossvalidation. Divide the dat into *m* parts, equal of close in size. For each part, we use the rest of the data as the training set and that piece as the test set. We repeat for each part, in a sense it's a number of experiments on the data when split into a little test set and a larger training set in different ways. See example below.
+
+Examples of cross validation and PCR in R in 7 minutes (start at 10 minutes):
+https://www.youtube.com/watch?v=MrtPbruYbWY&ab_channel=AnalyticsUniversity
+
+#### Simple Example
+
+Working through the Faraway book example starting on page 161 we use the dataset on mens' body fat and measurements in an effort to predict body fat, selecting on ly the circumference measurements from the dataset.  
+
+Below we see that the first principal component explains 86.7% of the variation in the data. 
+
+```{r}
+cfat <- fat[,9:18]
+prfat <- prcomp(cfat)
+#dim(prfat$rot)
+#dim(prfat$x)
+summary(prfat)
+```
+
+Each principal component is made up of some mix of the predictors. We can look at PC1's makeup below. Abdomen, chest, hip, and thigh make up the biggest 'components' of PC1. However, this could be because the physical measurements yield larger numbers so they have an outsized impact. We need to scale our numeric variables for a more clear comparison of impact.
+
+```{r}
+sort(round(prfat$rot[,1], 2), decreasing = TRUE)
+```
+
+Scaling the variables by standard units (subtracting the mean and dividing by the standard deviation). Then rerun the code above. Now PC1 has a lower ability to explain variance in the response, at 70.2%, but this should be more accurate as well as interpreting which predictors contribute to PC1.
+
+```{r}
+prfatc <- prcomp(cfat, scale = TRUE)
+summary(prfatc)
+sort(round(prfatc$rot[,1], 2), decreasing = TRUE)
+```
+
+#### Example - Crossvalidation and PCA
+
+Dividing your dataset into a train/test split only once means the cases you remove to put in the test set are lost in their ability to help your model. Crossvalidation does this train/test split, by default 10 times, that loss is mitigated.
+
+First we split the existing meatspec dataset. Using the pcr() function and setting a random seed for reproducible work and we can figure out where the minimum RMSE value occurs. The graph and output below show that 22 components has the minimum value.
+
+```{r}
+trainmeat <- meatspec[1:172,]
+testmeat <- meatspec[173:215,]
+
+set.seed(2911)
+pcrmod <- pcr(fat ~ ., data = trainmeat, validation = "CV", ncomp = 50)
+pcrCV <- RMSEP(pcrmod, estimate = "CV")
+plot(pcrCV, main = "")
+min(pcrCV$val)
+which.min(pcrCV$val)
+```
+Then we can see how using 22 components performs when predicting on the testmeat set. We get a RMSE of 2.1271 - the lower this value the better the model 'fits' the test set. This is a much better value than found via other PCA methods earlier in the textbook chapter.
+
+```{r}
+ypred <- predict(pcrmod, testmeat, ncomp = 22)
+round(rmse(ypred, testmeat$fat), 4)
+```
+
+However, looking at the plot above I see many small values that have less components than 22. Putting the components and values into lists, then a dataframe (and adding +1 to components values as to skip zero and line up with above analysis after some troubleshooting). We sort and see the 10 lowest values and the associated components count. In this case we could consider going the 17 component route, depending on how we want to balance the RMSE with model simplicity.
+
+```{r}
+
+list_A <- as.list(pcrCV$comps + 1)
+list_B <- as.list(pcrCV$val)
+
+
+pcrCV_df <- do.call(rbind, Map(data.frame, comps = list_A, val = list_B))
+
+
+head(pcrCV_df[order(pcrCV_df$val),], n = 10)
+
+```
+
+
+# 4. Model Selection {.tabset}  
+
+There are varying opinions on the 'best choice' methods for model selection methods, namely Adjusted R-Squared, AIC, AIC corrected, and BIC. A popular data analysis strategy is to calculate all 4 and look for the model that minimizes AIC, AIC corrected, BIC, and maximizes Adjusted R-Squared.
+
+The four above are called criterion-based methods. It's always possible that several models may end up having roughly the same quality of fit, in which case you should consider:  
+
+1 - Do the models have similar qualitative consequences?  
+2 - Do they make similar predictions?  
+3 - What is the cost of measuring the predictors?  
+4 - Which has the best diagnostics?  
+
+If the models are roughly comparable, but lead to quite different conclusions, then it is clear that the data cannot answer the question of interest unambiguously. 
+
+## Adjusted R-Squared
+
+Adjusted R-Squared is the proportion of the total sample variability in the response variable that is explained by the regression model, once we've also compensated (adjusted) so there is a penalty for adding irrelevant predictor variables.  
+With an Adjusted R-Squared of 78.9 we could say, "This model accounts for 78.9% of the variance observed in the dataset."
+
+Depending on the field, what is considered a good/high Adjusted R-Squared varies, and you also must look out for overfitting a model in an effort to get the highest Adjusted R-Squared.  
+
+### Example
+
+Taken from the book starting at page 155. We use the leaps library to search for all possible combination of the predictors (same code as AIC example). This time we plot by the adjusted r-squared and see that again 4 predictors is the best model. 
+
+code to see table output of what those parameters are (see AIC):  
+*rs$which*
+
+```{r}
+combos <- regsubsets(Life.Exp ~ ., data = statedata)
+rs <- summary(combos)
+
+plot(1:7, rs$adjr2,
+     xlab="No. of Parameters",
+     ylab="Adjusted R-square")
+```
+
+## Mallow's C Statistic
+
+This gives the average mean square error or the prediction. A model with a bad fit will have a much bigger Mallow's C than p-value.  
+
+*We desire models with small p and C around or less than p.*  
+
+### Example
+
+Very similar to the code in the adjusted r-squared and AIC examples. Here somewhere between the 3-predictor and 4-predictor model appears to be the best. Both of these are on or below the line (according to book's interpretation) so the choice is between the smaller model and the larger model, which fits a bit better. **I don't entirely understand how the textbook is reading this graph and making conclusions.**
+
+code to see table output of what those parameters are (see AIC):  
+*rs$which*
+
+```{r}
+combos <- regsubsets(Life.Exp ~ ., data = statedata)
+rs <- summary(combos)
+
+plot(1:7, rs$cp,
+     xlab="No. of Parameters",
+     ylab="Cp Statistic")
+
+abline(0,1)
+```
+
+
+
+## AIC
+
+Akaike's Information Criterion (AIC) is used when one wants to balance goodness of fit and a penalty for model complexity.   AIC is generally considered better when prediction is the aim. 
+
+*The smaller the value of AIC, the better the model.*  
+
+### Example
+
+Textbook example below shows using the 'leaps' library to exhaustively search all possible combinations of predictors. In the graph we see that the lowest AIC is found with 4 predictors. Using the output table we can see that would include the predictors of population, murder, high school graduation, and frost.  
+
+Read this chart by saying, "the best 1-predictor model uses murder". Next, "the best 2-predictor model uses murder and high school grad". And so on.
+```{r}
+combos <- regsubsets(Life.Exp ~ ., data = statedata)
+rs <- summary(combos)
+rs$which
+```
+
+Next we want to determine what number of predictors we want to stop at, we can compute and plot the AIC.  
+
+Remembering that the lowest AIC is desired, we see 4 predictors is ideal here. Referencing the table above, that means this AIC method select the best model as one with the 4 predictors of: population, murder, hs graduation, and frost.
+
+```{r}
+AIC <- 50*log(rs$rss/50) + (2:8)*2
+plot(AIC ~ I(1:7), ylab="AIC", xlab="Number of Predictors")
+```
+
+
+
+Note: there is a 'corrected' AIC for when the sample size is small or when number of factors/sample size is large.
+
+
+
+
+
+
+## BIC
+
+Bayesian Information Criterion (BIC) penalizes complex models more heavily than AIC, meaning it favors simpler models than AIC.  
+
+*The smaller the value of BIC the better the model.*  
+
+
+
+
+
+## Model complexity and bias-variance
+
+As model complexity increases variance will be large. When you have low model complexity variance will be small. Inversely, high bias is found in small model complexity and low bias is found in high model complexity.
+
+Lower complexity models often give *consistently* good (but not great) predictions. 
+
+Must find the sweet spot of model complexity to balance these, three commonly used methods are regularization, boosting, and bagging.
+
+![bias-variance-complexity](images/bias_variance.PNG)
+
+![bias-variance-target](images/bias_variance2.PNG)
+
+6 minute video on issue: https://www.youtube.com/watch?v=EuBBz3bI-aA&ab_channel=StatQuestwithJoshStarmer
+
+
