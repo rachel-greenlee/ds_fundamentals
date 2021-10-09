@@ -134,9 +134,19 @@ Via the backwards elimination feature selection method for this dataset the abov
 
 ## Embedded Methods {.tabset}
 
+Ridge Regression is expected to work better if there are many large parameters of about the same value, i.e. when most predictors truly impact the response. LASSO, on the other hand, is expected to come on top when there are a small number of significant parameters and the others are close to zero, i.e. when only a few predictors actually influence the response.
+
 ### LASSO Regression
 
-### Ridge Rerression
+Lasso, or Least Absolute Shrinkage and Selection Operator, is very similar in spirit to Ridge Regression. It also adds a penalty for non-zero coefficients to the loss function, but unlike Ridge Regression which penalizes the sum of squared coefficients (the so-called L2 penalty), LASSO penalizes the sum of their absolute values (L1 penalty). As a result, for high values of λ, many coefficients are exactly zeroed under LASSO, which is never the case in Ridge Regression.
+
+### Ridge Regression
+
+Ridge regression makes the assumption that the regression coefficients (after normalization) should not be very large. This is a reasonable assumption in applications where you have a large number of predictors and you believe that many of them have some effect on the response. Hence shrinkage is embedded in the method. Ridge regression is particularly effective when the model matrix is collinear and the usual least squares estimates of β appear to be unstable.  
+
+One drawback of Best Subset Regression is that it does not tell us anything about the impact of the variables that are excluded from the model on the response variable. Ridge Regression provides an alternative to this hard selection of variables that splits them into included in and excluded from the model. Instead, it penalizes the coefficients to shrink them towards zero. Not exactly zero, as that would mean exclusion from the model, but in the direction of zero, which can be viewed as decreasing model’s complexity in a continuous way, while keeping all variables in the model.
+
+!!!TODO - book section short/not helpful, find better resource/examples for this section
 
 ### Random Forest
 
