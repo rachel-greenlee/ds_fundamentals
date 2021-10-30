@@ -279,6 +279,10 @@ rsq
 
 Fantastic example here (with train/test split too) especially regarding interpreting model summary output and calculating model fit: https://www.r-bloggers.com/2020/05/binary-logistic-regression-with-r/ 
 
+Statquest Logsitic Regression in R example (with code) starting at 6:45:
+https://www.youtube.com/watch?v=C4N3_XJJ-jU&list=PLblh5JKOoLUKxzEP5HA2d-Li7IJkHfXSe&index=7&ab_channel=StatQuestwithJoshStarmer
+https://github.com/StatQuest/logistic_regression_demo/blob/master/logistic_regression_demo.R
+
 The logistic regression model is used to model the relationship between a binary target variable and a set of independent variables. These independent variables can be either qualitative or quantitative. In logistic regression, the model predicts the logit transformation of the probability of the event.  
 
 #### Characteristics of Logistic Regression
@@ -295,7 +299,7 @@ The is no consensus on how to calculate $R^2$ on logistic regression, there are 
 
 ![](images/logistic_models.PNG)
 
-**Deviance** refers to residual deviance and null deviance, which is shown on an R output of a logistic regression. It's also accompanied by the degrees of freedom (number of predictors).  
+**Deviance** refers to residual deviance and null deviance, which is shown on an R output of a logistic regression. It's also accompanied by the degrees of freedom (number of predictors). On an individual level it can help identify outlyers in the data.
 
 Plug the proposed model values into a chi-square to get a p-value that can tell you if the saturated model is significantly different than the proposed model. (For this to work, the proposed model must be a simpler version of the saturated model - which is called *nested*.)  
 
