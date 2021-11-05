@@ -54,7 +54,27 @@ Both ridge regression and lasso regression are addressed to deal with multicolli
 
 ## Types {.tabset}
 
-### Consider Robust Regression
+### Linear Models v Generalized Linear Models v Genralized Least Squares Model
+
+The *lm* function in R is for linear regression models, where:  
+1) normal errors  
+2) constant variance  
+
+The *glm* function in R is for generalized linear models, where:  
+1) non-normal errors  
+2) non-constant variance  
+The slope can be interpreted as the change in the response variable for 1 unit of change in the independent variable, if you do e to the power of that value. #exp(coef(model1)[2]) will give you that value  
+
+
+
+The *gls* function in R is for generalized least squares models, where:  
+1) correlated errors  
+2) spatial/temporal patterns/trends
+
+30-minute video explaining differences and fitting a model from each to the same data:
+https://www.youtube.com/watch?v=P-WYkSZp9lY
+
+#### Consider Robust Regression
 
 For some models there doesn't need to be constant variance (such as in Poission regressions), and it can be useful to build that varying variance into the model. You can do so with Robust Regression. This does *not* apply to models that have a required assumption of constant variance, such as linear regression.
 
@@ -65,7 +85,17 @@ Weighted-Least-Squares (WLS) Estimation is used when variance is not constant, w
 Graphic intuition about WLS vs OLS starting minute 3: https://www.youtube.com/watch?v=wCJ8I-MtJdQ&ab_channel=BenLambert
 
 Very succinct walk-through of checking if WLS is needed and implementing it, then comparing the two models:
-https://www.statology.org/weighted-least-squares-in-r/
+https://www.statology.org/weighted-least-squares-in-r/  
+
+#### Check Autocorrelation (Serially Correlated) Errors for Time Series Data  
+
+Time series data often follows a pattern, and that pattern can affect the errors and prediction of a model. In R we can check for this 'lag', the affect the previous time period has on the current time period, and then incorporate it into the model for a better fit.
+
+Great datacamp tutorial page with how to check for autocorrelation by various lags:
+https://www.datacamp.com/community/tutorials/autocorrelation-r
+
+Simple example on Rpubs:
+https://rpubs.com/fractalbass/615815
 
 
 ### Linear Regression
