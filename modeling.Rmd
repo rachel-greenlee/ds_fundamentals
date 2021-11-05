@@ -54,6 +54,20 @@ Both ridge regression and lasso regression are addressed to deal with multicolli
 
 ## Types {.tabset}
 
+### Consider Robust Regression
+
+For some models there doesn't need to be constant variance (such as in Poission regressions), and it can be useful to build that varying variance into the model. You can do so with Robust Regression. This does *not* apply to models that have a required assumption of constant variance, such as linear regression.
+
+Robust regression is an alternative to least squares regression when data are contaminated with outliers or influential observations, and it can also be used for the purpose of detecting influential observations. The idea of robust regression is to weigh the observations differently based on how well behaved these observations are.
+
+Weighted-Least-Squares (WLS) Estimation is used when variance is not constant, which is a requirement of Ordinary-Leasty Squares (OLS) Estimation. When WLS makes a model, it recognizes areas along the x-axis that have higher variance, and then adjusts the line/model accordingly. So an outlier in the ‘low variance’ section of the x-axis would have more impact on adjusting the model than an outlier in the ‘high variance’ section of the x-axis (where we expect more variance).
+
+Graphic intuition about WLS vs OLS starting minute 3: https://www.youtube.com/watch?v=wCJ8I-MtJdQ&ab_channel=BenLambert
+
+Very succinct walk-through of checking if WLS is needed and implementing it, then comparing the two models:
+https://www.statology.org/weighted-least-squares-in-r/
+
+
 ### Linear Regression
 
 Used when response variable is quantitative and continuous. When you have only 1 iindependent variable it's called a *simple linear regression*, with more than 1 independent variable it is *multiple linear regression*.
@@ -404,6 +418,27 @@ confint(oring_logit_mod)
 ```
 
 
+### Poission Regression
+
+Used for rates, proportions, contingency tables. If large enough (such as a mean greater than 30) it will approach normal so you probably don’t need to do a Poisson - but often there isn’t enough data so a Poisson Model is needed. Further, the data of counts is always positive. The mean and variance of a Poisson distribution equals lambda. You use log-scale coefficients.
+
+If the residual deviance is much larger than the residual degrees of freedom, then the data is overdispersed - as we expect a model that fits reasonably well to have a residual deviance roughly equal to the degrees of freedom. John Fox argues overdispersion is so common in regression models for count data, and its consequences are potentially so severe, that models such as the quasi-Poisson and negative-binomial GLMs discussed in this section should be employed as a matter of course in preference to the Poisson GLM (Applied Regression Analysis & Generalized Linear Models). 
+
+The Poisson distribution has only one parameter and so it’s not very flexible for empirical fitting purposes. One can add a dispersion parameter (making it a quasi-Poisson) or model the response as a negative binomial or other more flexible distribution if the specific mechanism of the data relationship is known. If data has a variance that is over the mean, your data is over-dispersed so you need something other than a Poisson. Zero inflation is when there are far more zero values in response variable.
+
+If the count is some number out of a possible total/ound, then the response might be better modeled as a binomial. However, for small success probabilities (low rates) and large totals (n) the Poisson is a good approximation and can be applied. For example, rates of a cancer across a state will have a large n and a small p. 
+
+If individual count data meets Poisson, so will the sum of those counts aka aggregate data. This can be useful if you only have the sum counts.
+
+The Poisson deviance is also known as the G-statistic.
+
+See 'Consider Robust Regression' section if variance if data is not constant.
+
+4 minute intro to why/when Poisson is needed: https://www.youtube.com/watch?v=xgifo6nFo1s&ab_channel=DataCamp
+
+R walkthrough of Poission: https://stats.idre.ucla.edu/r/dae/poisson-regression/
+
+
 
 
 ### Random Forest
@@ -442,7 +477,7 @@ Ones that seem to stand on their own as regression methods (and not just feature
 
 Faraway (Linear Models with R) does not recommend the test-based procedures of backward elimination, forward selection, or stepwise regression - except in simple cases when only a few models are compared or in highly structured hierarchical models. 
 
-### Example 
+#### Example 
 
 Regardless, all the textbooks seem to cover these. Here is an example of backwards elimination from the prompt on page 159 Faraway (Linear Models with R) but instead using the 'state' dataset from p151 as I can interpret it better.
 
