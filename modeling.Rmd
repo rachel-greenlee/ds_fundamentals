@@ -468,10 +468,26 @@ See 'Consider Robust Regression' section if variance if data is not constant.
 
 R walkthrough of Poission: https://stats.idre.ucla.edu/r/dae/poisson-regression/
 
+"How do you know when to use binomial or Poisson?
+The binomial distribution counts discrete occurrences among discrete trials. The poisson distribution counts discrete occurrences among a continuous domain. Ideally speaking, the poisson should only be used when success could occur at any point in a domain."
 
 
 
-### Random Forest
+
+### Binomil Model & Multinomial Logit Model
+
+Use a binomial model when the response has two values, if it has more use a multinomial model.  
+
+There is a distinction between *nominal* multinomial data, where there is no natural order to the categories, and *ordinal* multinomial data, where this is an order. **The multinomial logit model is intended for nominal data. It can be used for ordinal data, but the information about order will not be incorporated into the model.**
+
+Example in R  
+
+Part 1 - Data & Model (6 minutes)
+https://www.youtube.com/watch?v=S2rZp4L_nXo&ab_channel=Dr.BharatendraRai
+
+
+Part 2 - Final Model & Interpretation (8 minutes)
+https://www.youtube.com/watch?v=oxRy2DMrOF4&ab_channel=Dr.BharatendraRai
 
 # 3. Feature Selection
 
