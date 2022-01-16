@@ -28,9 +28,15 @@ library(dplyr) # for piping function! other tools for manipulating datasets
 
 # 1. Identify the goal 
 
-## Subheading w/o tabs underneath
+*1. Understand the physical background. Take time to learn about the subject area and/or pull in an expert.
+*2. Understand the objective. List out why you are beginning this analysis project, what are your questions? What would the answers allow you to do? (don't go fishing aimlessly as you will certainly find something but it could just be a coincidence)
+*3. Make sure you know what the client wants. Sometimes all that is needed are simple descriptive statistics. 
+*4. Put the problem into statistical terms. This can be challenging but do your best.
+
 
 # 2. Obtain the data
+
+First ask questions about how the data was collected (observational or experimental), check for nonresponse and missing values.See how the data is coded, waht the units of measurement are, and be on the lookout for data entry errors - perform sanity checks. 
 
 ## Various Methods {.tabset}
 
