@@ -98,11 +98,30 @@ Simple example on Rpubs:
 https://rpubs.com/fractalbass/615815
 
 
-### Linear Regression
+### Multiple/Linear Regression
 
-Used when response variable is quantitative and continuous. When you have only 1 iindependent variable it's called a *simple linear regression*, with more than 1 independent variable it is *multiple linear regression*.
+Used when response variable is quantitative and continuous. When you have only 1 independent variable it's called a *simple linear regression*, with more than 1 independent variable it is *multiple linear regression*.
 
-Despite its simplicity, the linear model has advantages in interpretability and it often shows good predictive performance.  
+Despite its simplicity, the linear model has advantages in interpretability and it often shows good predictive performance.
+
+Example of multiple linear regression code from Wine Sales project.
+
+```{r}
+# # just variables that showed up in correlation plot
+# m_mlin_1 <- lm(TARGET ~ AcidIndex + STARS_new + LabelAppeal_factor, raw)
+# 
+# # starting with subset of variables used on  model 2 in earlier section, and jump
+# # right to the backwards elimination step
+# m_mlin_full <- lm(TARGET ~ ., raw[,c(1,3,5:13)])
+# m_mlin_2 <- step(m_mlin_full, selection='backwards', trace = F)
+# 
+# summary(m_mlin_1)
+# 
+
+```
+
+
+
 
 #### Assumptions of linear regression:
 1. There must be a linear relation between independent and dependent variables.
@@ -471,6 +490,51 @@ R walkthrough of Poission: https://stats.idre.ucla.edu/r/dae/poisson-regression/
 "How do you know when to use binomial or Poisson?
 The binomial distribution counts discrete occurrences among discrete trials. The poisson distribution counts discrete occurrences among a continuous domain. Ideally speaking, the poisson should only be used when success could occur at any point in a domain."
 
+Example of code for modeling taken from Wine Sales project. 
+
+```{r}
+# # only include variables that had promise in correlation plot
+# m_pois_1 <- glm(TARGET ~ AcidIndex + STARS_new + LabelAppeal_factor, family = "poisson", raw)
+# 
+# ## all variables, except original STARS (so it doesn't drop NAs)
+# m_pois_2 <- glm(TARGET ~ ., family = "poisson", raw[,c(1,3,5:13)])
+# 
+# # try backwards step from previous model
+# m_pois_3 <- step(m_pois_2, selection='backwards', trace = F)
+# 
+# # try zero-inflated poisson to account for large counts of zero
+# m_pois_4 <- zeroinfl(TARGET ~ AcidIndex + STARS_new + LabelAppeal_factor, raw)
+
+
+#summary(m_pois_1)
+
+#checking for dispersion
+#dispersiontest(m_pois_1)
+
+# comparing models to each other with Vuong Non-Nested Hypothesis Test-Statistic
+#vuong(m_pois_3, m_pois_4)
+
+```
+
+
+
+### Negative Binomial
+
+Generally the Negative Binomial is used in favor of the Poisson when the response variable is a count but the mean does not equal the variance. Further if there is overdispersion a Negative Binomial should be used instead of a Poisson. 
+
+
+Code example from Wine Sales project.
+
+```{r}
+# m_binom_1 <- glm.nb(TARGET ~ AcidIndex + STARS_new + LabelAppeal_factor, raw)
+# 
+# m_binom_2 <- glm.nb(TARGET ~ ., raw[,c(1,3,5:13)])
+# 
+# m_binom_3 <- step(m_binom_2, selection='backwards', trace=F)
+
+#summary(m_binom_3)
+
+```
 
 
 
@@ -792,6 +856,28 @@ Bayesian Information Criterion (BIC) penalizes complex models more heavily than 
 *The smaller the value of BIC the better the model.*  
 
 
+## Creating predicted values to check accuracy
+
+One can use a handful of different models and use the `predict()` function to create guesses of the target variable off of the test/hold-out data set. Then one can compare the predicted target variable with the actual found in the test/hold-out data set.
+
+Code example from Wine Sales project. This outputs simply a percentage representating the accuracy for each model tested.
+
+```{r}
+# # creating predicted values from models
+# raw$m_pois_1 <- round(predict(m_pois_1,raw,type='response'))
+# raw$m_pois_3 <- round(predict(m_pois_3,raw,type='response'))
+# raw$m_pois_4 <- round(predict(m_pois_4,raw,type='response'))
+# 
+# # checking accuracy
+# cm_pois_1 <- confusionMatrix(as.factor(raw$m_pois_1),as.factor(raw$TARGET))
+# cm_pois_1$overall['Accuracy']
+# 
+# cm_pois_3 <- confusionMatrix(as.factor(raw$m_pois_3),as.factor(raw$TARGET))
+# cm_pois_3$overall['Accuracy']
+# 
+# cm_pois_4 <- confusionMatrix(as.factor(raw$m_pois_4),as.factor(raw$TARGET))
+# cm_pois_4$overall['Accuracy']
+```
 
 
 
