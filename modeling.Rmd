@@ -100,9 +100,17 @@ https://rpubs.com/fractalbass/615815
 
 ### Multiple/Linear Regression
 
+See fantastic case study on page 147 of Practical Machine Learning in R book I own (with first half of chapter explaining all related concepts).
+
+Regression techniques are a category of ML algorithms that seek to predict a numeric response by quantifying the size and strength of the relationship between numerical values.
+
 Used when response variable is quantitative and continuous. When you have only 1 independent variable it's called a *simple linear regression*, with more than 1 independent variable it is *multiple linear regression*.
 
 Despite its simplicity, the linear model has advantages in interpretability and it often shows good predictive performance.
+
+*Correlation* is  statistic term used to describe and quantify the relationship between two variables. The *correlation coefficient* is the value that quantifies this relationship, with Pearson's correlation coefficient being the most commonly used for linear relationships (with larger absolute values indicating stronger relationships, whether positive or negative).  
+
+Ordinary Least Squares (OLS) method is the simplest way to find the regression line. Essentially it minimizes the residuals, the errors, when choosing a line to shoot through the datapoints. The line's predicted values for all x's is subtracted from the actual value in the dataset, and it's absolute value is summed up with the rest. This is the *residual sum of squares* or *sum of squared errors*.
 
 Example of multiple linear regression code from Wine Sales project.
 
@@ -121,6 +129,13 @@ Example of multiple linear regression code from Wine Sales project.
 ```
 
 
+The summary output has multiple sections.  
+1. The residuals section shows the minimum and maximum residual found with the produced model, while the median residual shows a sense of the typical model performance.   
+2. The coefficients section can be helpful for model interpretability.  
+3. The standard error, which is the standard deviation of the parameter estimates is included. The lower the standard error is with regard to the estimate, the better the estimate is. On the p-values, three *** means that variable is significant at a value less than 0.001 - you'll see the legend below the output of the other *** levels.  
+4. The residual standard error is the average amount that the predicted response will deviate from the observed data. This is a measure of lack of fit for a model. Whether the number is good or bad is dependent on the context of the problem. In general, the smaller the RSE, the more confident we are that our model fits our data well. The degrees of freedom value provides the number of data point sin our model that are variable.  
+5. The R-squared statistic provides an alternative measure of fit from the RSE. It provides a measure of fit independent of the scale of Y and is a proportion with values between 0 and 1. It allows us to say, "this model accounts for 63.9% of the variance in the data." The adjusted R-squared is slightly modified to penalize models with a large number of independent variables. This is useful when comparing models to each other.  
+6. The F-statistic is a statistical test of whether there exists a relationships between the predictor and the response variables. The larger the value for the F-statistic, the stronger the relationship. The p-value here is more useful, it tells us how likely it is that the variables in our regression model fit the data in a statistically significant manner. The closer the value is to zero, the better the fit. 
 
 
 #### Assumptions of linear regression:
@@ -504,15 +519,15 @@ Example of code for modeling taken from Wine Sales project.
 # 
 # # try zero-inflated poisson to account for large counts of zero
 # m_pois_4 <- zeroinfl(TARGET ~ AcidIndex + STARS_new + LabelAppeal_factor, raw)
-
-
-#summary(m_pois_1)
-
-#checking for dispersion
-#dispersiontest(m_pois_1)
-
-# comparing models to each other with Vuong Non-Nested Hypothesis Test-Statistic
-#vuong(m_pois_3, m_pois_4)
+# 
+# 
+# summary(m_pois_1)
+# 
+# #checking for dispersion
+# dispersiontest(m_pois_1)
+# 
+# #comparing models to each other with Vuong Non-Nested Hypothesis Test-Statistic
+# vuong(m_pois_3, m_pois_4)
 
 ```
 
